@@ -33,11 +33,13 @@ export default function OnboardingPage() {
   const [address, setAddress] = useState("");
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
+  const [capacityKg, setCapacityKg] = useState("");
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const needsOrg = role === "donor" || role === "receiver";
+  const needsCapacity = role === "receiver";
 
   if (status === "loading") return null;
   if (status === "unauthenticated") {
@@ -76,6 +78,10 @@ export default function OnboardingPage() {
       setError("Please set your organization's location");
       return;
     }
+    if (needsCapacity && !capacityKg) {
+      setError("Please enter your storage capacity");
+      return;
+    }
 
     setLoading(true);
 
@@ -86,7 +92,13 @@ export default function OnboardingPage() {
         phone: phone || undefined,
         role,
         org: needsOrg
-          ? { name: orgName, address, lat: parseFloat(lat), lng: parseFloat(lng) }
+          ? {
+              name: orgName,
+              address,
+              lat: parseFloat(lat),
+              lng: parseFloat(lng),
+              capacityKg: needsCapacity ? parseFloat(capacityKg) : undefined,
+            }
           : undefined,
       }),
     });
@@ -194,6 +206,23 @@ export default function OnboardingPage() {
                     {locating ? "Locating..." : "Use my location"}
                   </Button>
                 </div>
+                {needsCapacity ? (
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="capacityKg">Storage capacity (kg)</Label>
+                    <Input
+                      id="capacityKg"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      required
+                      value={capacityKg}
+                      onChange={(e) => setCapacityKg(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Used to match you with right-sized donations.
+                    </p>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
