@@ -76,8 +76,12 @@ export function OrgVerificationTable({ initialOrgs }: { initialOrgs: OrgRow[] })
         </TableRow>
       </TableHeader>
       <TableBody>
-        {orgs.map((org) => (
-          <TableRow key={org.id}>
+        {orgs.map((org, i) => (
+          <TableRow
+            key={org.id}
+            className="animate-in fade-in slide-in-from-left-1 fill-mode-backwards duration-300"
+            style={{ animationDelay: `${i * 40}ms` }}
+          >
             <TableCell className="font-medium">{org.name}</TableCell>
             <TableCell>
               {org.type === "donor_business" ? "Donor" : "Receiver"}
@@ -85,10 +89,17 @@ export function OrgVerificationTable({ initialOrgs }: { initialOrgs: OrgRow[] })
             <TableCell className="max-w-xs truncate">{org.address}</TableCell>
             <TableCell>
               <div className="flex flex-wrap gap-1">
-                <Badge variant={STATUS_VARIANT[org.verificationStatus]}>
+                <Badge
+                  variant={STATUS_VARIANT[org.verificationStatus]}
+                  className={org.verificationStatus === "pending" ? "animate-pulse" : ""}
+                >
                   {org.verificationStatus}
                 </Badge>
-                {org.flagged && <Badge variant="destructive">Flagged</Badge>}
+                {org.flagged && (
+                  <Badge variant="destructive" className="animate-pulse">
+                    Flagged
+                  </Badge>
+                )}
               </div>
             </TableCell>
             <TableCell className="text-right">
