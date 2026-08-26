@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { requireRole, getOrgVerification } from "@/lib/auth-helpers";
 import { VerificationBanner } from "@/components/verification-banner";
@@ -32,13 +33,16 @@ export default async function DonorDashboard() {
         pickupWindowStart: l.pickupWindowStart.toISOString(),
         pickupWindowEnd: l.pickupWindowEnd.toISOString(),
         claimExpiresAt: l.claimExpiresAt.toISOString(),
+        safetyNotes: l.safetyNotes,
+        urgencyHint: l.urgencyHint,
+        imageUrl: l.imageUrl,
         status: l.status,
       }))
     : [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Donor dashboard</h1>
           <p className="mt-1 text-muted-foreground">
@@ -46,7 +50,15 @@ export default async function DonorDashboard() {
             {org ? ` — ${org.name}` : ""}
           </p>
         </div>
-        {isVerified ? <ListingForm /> : null}
+        <div className="flex flex-wrap items-center gap-4">
+          <Link href="/org-profile" className="text-sm text-primary underline underline-offset-4">
+            Org profile
+          </Link>
+          <Link href="/donor/insights" className="text-sm text-primary underline underline-offset-4">
+            Insights
+          </Link>
+          {isVerified ? <ListingForm /> : null}
+        </div>
       </div>
 
       {org && org.verificationStatus !== "verified" ? (
