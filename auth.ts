@@ -59,6 +59,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
+          image: user.photoUrl,
           role: user.role,
           orgId: user.orgId,
           orgVerified,
@@ -91,6 +92,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             t.role = dbUser.role;
             t.orgId = dbUser.orgId;
             t.orgVerified = dbUser.orgId ? await isOrgVerified(dbUser.orgId) : false;
+            t.picture = dbUser.photoUrl ?? user.image;
           } else {
             t.role = null;
             t.orgId = null;
@@ -113,6 +115,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           t.role = dbUser.role;
           t.orgId = dbUser.orgId;
           t.orgVerified = dbUser.orgId ? await isOrgVerified(dbUser.orgId) : false;
+          t.picture = dbUser.photoUrl;
+          t.name = dbUser.name;
         }
       }
 
@@ -124,6 +128,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.role = t.role;
       session.user.orgId = t.orgId;
       session.user.orgVerified = t.orgVerified;
+      session.user.image = t.picture;
       return session;
     },
   },
