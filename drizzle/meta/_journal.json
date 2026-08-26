@@ -8,6 +8,34 @@
       "when": 1787663612047,
       "tag": "0000_thankful_roulette",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787722705472,
+      "tag": "0001_illegal_dakota_north",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787723830498,
+      "tag": "0002_legal_saracen",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787725795996,
+      "tag": "0003_known_swordsman",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787727957178,
+      "tag": "0004_true_hellcat",
+      "breakpoints": true
     }
   ]
 }
