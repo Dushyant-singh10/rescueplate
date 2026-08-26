@@ -6,6 +6,11 @@ import { organizations } from "@/db/schema";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Lists live verified orgs — must not be statically generated at build time
+// (that would both need DB access during the build and freeze the list at
+// whatever existed then).
+export const dynamic = "force-dynamic";
+
 export default async function NetworkPage() {
   const orgs = await db
     .select()
