@@ -37,12 +37,14 @@ export default function RegisterPage() {
   const [address, setAddress] = useState("");
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
+  const [capacityKg, setCapacityKg] = useState("");
   const [locating, setLocating] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const needsOrg = role === "donor" || role === "receiver";
+  const needsCapacity = role === "receiver";
 
   function useMyLocation() {
     if (!navigator.geolocation) {
@@ -71,6 +73,10 @@ export default function RegisterPage() {
       setError("Please set your organization's location");
       return;
     }
+    if (needsCapacity && !capacityKg) {
+      setError("Please enter your storage capacity");
+      return;
+    }
 
     setLoading(true);
 
@@ -86,6 +92,7 @@ export default function RegisterPage() {
             address,
             lat: parseFloat(lat),
             lng: parseFloat(lng),
+            capacityKg: needsCapacity ? parseFloat(capacityKg) : undefined,
           }
         : undefined,
     };
@@ -237,6 +244,20 @@ export default function RegisterPage() {
                     {locating ? "Locating..." : "Use my location"}
                   </Button>
                 </div>
+                {needsCapacity ? (
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="capacityKg">Storage capacity (kg)</Label>
+                    <Input
+                      id="capacityKg"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      required
+                      value={capacityKg}
+                      onChange={(e) => setCapacityKg(e.target.value)}
+                    />
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
