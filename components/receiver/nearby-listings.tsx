@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -8,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { NearbyListing } from "@/lib/geo";
 
 const RADIUS_OPTIONS = [2, 5, 10, 25, 50];
@@ -23,6 +25,8 @@ export function NearbyListings() {
   const [listings, setListings] = useState<NearbyListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +54,26 @@ export function NearbyListings() {
     if (!value) return;
     setLoading(true);
     setRadius(parseInt(value, 10));
+  }
+
+  function handleClaim(listingId: string) {
+    setClaimingId(listingId);
+    startTransition(async () => {
+      const res = await fetch(`/api/listings/${listingId}/claim`, {
+        method: "POST",
+      });
+
+      if (res.status === 409) {
+        toast.error("Someone else just claimed this listing");
+        setListings((prev) => prev.filter((l) => l.id !== listingId));
+      } else if (!res.ok) {
+        toast.error("Could not claim this listing. Please try again.");
+      } else {
+        toast.success("Claimed! Coordinate pickup within the listed window.");
+        setListings((prev) => prev.filter((l) => l.id !== listingId));
+      }
+      setClaimingId(null);
+    });
   }
 
   return (
@@ -111,6 +135,15 @@ export function NearbyListings() {
                     Claim by {new Date(listing.claimExpiresAt).toLocaleString()}
                   </p>
                 </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full"
+                    disabled={isPending && claimingId === listing.id}
+                    onClick={() => handleClaim(listing.id)}
+                  >
+                    {isPending && claimingId === listing.id ? "Claiming..." : "Claim"}
+                  </Button>
+                </CardFooter>
               </Card>
             ))}
           </div>
