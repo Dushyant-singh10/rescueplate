@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ import { ListingForm, type EditableListing } from "@/components/donor/listing-fo
 
 export type ListingRow = EditableListing & {
   status: "available" | "claimed" | "picked_up" | "expired" | "cancelled";
+  imageUrl: string | null;
 };
 
 const STATUS_VARIANT: Record<ListingRow["status"], "default" | "secondary" | "destructive" | "outline"> = {
@@ -64,7 +66,7 @@ export function ListingList({ listings }: { listings: ListingRow[] }) {
 
   if (listings.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="animate-in fade-in p-4 text-sm text-muted-foreground">
         You haven&apos;t posted any listings yet.
       </p>
     );
@@ -74,6 +76,7 @@ export function ListingList({ listings }: { listings: ListingRow[] }) {
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-14" />
           <TableHead>Title</TableHead>
           <TableHead>Quantity</TableHead>
           <TableHead>Claim deadline</TableHead>
@@ -82,17 +85,33 @@ export function ListingList({ listings }: { listings: ListingRow[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {listings.map((listing) => (
-          <TableRow key={listing.id}>
+        {listings.map((listing, i) => (
+          <TableRow
+            key={listing.id}
+            className="animate-in fade-in slide-in-from-left-1 fill-mode-backwards duration-300"
+            style={{ animationDelay: `${i * 40}ms` }}
+          >
+            <TableCell>
+              {listing.imageUrl ? (
+                <div className="relative size-10 overflow-hidden rounded-md">
+                  <Image src={listing.imageUrl} alt="" fill className="object-cover" />
+                </div>
+              ) : (
+                <div className="size-10 rounded-md bg-muted" />
+              )}
+            </TableCell>
             <TableCell className="font-medium">{listing.title}</TableCell>
             <TableCell>
               {listing.quantity} {listing.unit}
             </TableCell>
-            <TableCell>
+            <TableCell suppressHydrationWarning>
               {new Date(listing.claimExpiresAt).toLocaleString()}
             </TableCell>
             <TableCell>
-              <Badge variant={STATUS_VARIANT[listing.status]}>
+              <Badge
+                variant={STATUS_VARIANT[listing.status]}
+                className={listing.status === "claimed" ? "animate-pulse" : ""}
+              >
                 {listing.status.replace("_", " ")}
               </Badge>
             </TableCell>
