@@ -27,8 +27,10 @@ an ordered candidate list.
 one is immediately promoted to `"offered"` with a 15-minute response window
 (`POST /api/claims/[id]/respond`). If the receiver declines, the next candidate is offered
 immediately in the same transaction. If nobody responds in time, a cron
-(`/api/cron/resolve-claim-windows`, every 5 minutes) marks the offer `"expired"` and cascades to the
-next candidate — a real state machine, not a status field flipped by a single actor.
+(`/api/cron/resolve-claim-windows`) marks the offer `"expired"` and cascades to the next candidate —
+a real state machine, not a status field flipped by a single actor. In production this cron runs once
+daily (`vercel.json`), since Vercel's Hobby plan only allows daily cron execution; on Pro it could run
+every few minutes to make the cascade near-instant.
 
 **Explainability** — every offer stores its `scoreBreakdown` (the four factors above), rendered in the
 UI (`components/allocation-trace.tsx`) so a receiver or admin can see exactly why a given NGO was
