@@ -56,6 +56,8 @@ export async function PATCH(
       pickupWindowStart: parsed.data.pickupWindowStart,
       pickupWindowEnd: parsed.data.pickupWindowEnd,
       claimExpiresAt: parsed.data.claimExpiresAt,
+      safetyNotes: parsed.data.safetyNotes ?? null,
+      urgencyHint: parsed.data.urgencyHint,
     })
     .where(eq(listings.id, id));
 
