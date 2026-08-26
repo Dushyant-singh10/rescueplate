@@ -3,7 +3,7 @@ import Link from "next/link";
 const AUTHOR = {
   name: "Dushyant",
   github: "https://github.com/Dushyant-singh10",
-  linkedin: "",
+  linkedin: "https://www.linkedin.com/in/dushyant-singh-030175376/",
 };
 
 export function SiteFooter() {
