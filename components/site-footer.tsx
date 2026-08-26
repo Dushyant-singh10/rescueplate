@@ -2,7 +2,8 @@ import Link from "next/link";
 
 const AUTHOR = {
   name: "Dushyant",
-  github: "https://github.com/Dushyant-singh10",
+  github: "https://github.com/Dushyant-singh10/rescueplate",
+  actions: "https://github.com/Dushyant-singh10/rescueplate/actions",
   linkedin: "https://www.linkedin.com/in/dushyant-singh-030175376/",
 };
 
@@ -14,6 +15,9 @@ export function SiteFooter() {
         <div className="flex items-center gap-4">
           <Link href={AUTHOR.github} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
             GitHub
+          </Link>
+          <Link href={AUTHOR.actions} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+            CI
           </Link>
           {AUTHOR.linkedin ? (
             <Link href={AUTHOR.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
