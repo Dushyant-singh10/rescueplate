@@ -46,6 +46,9 @@ export async function POST(request: Request) {
       pickupWindowStart: parsed.data.pickupWindowStart,
       pickupWindowEnd: parsed.data.pickupWindowEnd,
       claimExpiresAt: parsed.data.claimExpiresAt,
+      safetyNotes: parsed.data.safetyNotes ?? null,
+      urgencyHint: parsed.data.urgencyHint,
+      imageUrl: parsed.data.imageUrl ?? null,
       lat: org.lat,
       lng: org.lng,
     })
