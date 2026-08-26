@@ -28,6 +28,8 @@ export type EditableListing = {
   pickupWindowStart: string;
   pickupWindowEnd: string;
   claimExpiresAt: string;
+  safetyNotes: string | null;
+  urgencyHint: number;
 };
 
 function toLocalInputValue(iso: string) {
@@ -56,8 +58,62 @@ export function ListingForm({ listing }: { listing?: EditableListing }) {
   const [claimExpiresAt, setClaimExpiresAt] = useState(
     listing ? toLocalInputValue(listing.claimExpiresAt) : ""
   );
+  const [safetyNotes, setSafetyNotes] = useState(listing?.safetyNotes ?? "");
+  const [urgencyHint, setUrgencyHint] = useState(listing?.urgencyHint ?? 0.5);
+  const [urgencyRationale, setUrgencyRationale] = useState<string | null>(null);
+  const [aiText, setAiText] = useState("");
+  const [parsing, setParsing] = useState(false);
+  const [scoringUrgency, setScoringUrgency] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  async function handleParseWithAi() {
+    if (!aiText.trim()) return;
+    setParsing(true);
+    setError(null);
+    const res = await fetch("/api/ai/parse-listing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: aiText }),
+    });
+    setParsing(false);
+    if (!res.ok) {
+      setError("Could not parse that description — please fill in the form manually.");
+      return;
+    }
+    const data = await res.json();
+    setTitle(data.title);
+    setDescription(data.description);
+    setFoodType(data.foodType);
+    setQuantity(String(data.quantity));
+    setUnit(data.unit);
+    setAllergens(data.allergens.join(", "));
+    setSafetyNotes(data.safetyNotes ?? "");
+    setUrgencyHint(data.urgencyHint);
+    setUrgencyRationale(data.rationale);
+    toast.success("Parsed — review the fields below before posting");
+  }
+
+  async function handleRecheckUrgency() {
+    if (!aiText.trim()) return;
+    setScoringUrgency(true);
+    const res = await fetch("/api/ai/urgency-score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: aiText,
+        claimExpiresAt: claimExpiresAt ? new Date(claimExpiresAt).toISOString() : undefined,
+      }),
+    });
+    setScoringUrgency(false);
+    if (!res.ok) {
+      toast.error("Could not re-score urgency");
+      return;
+    }
+    const data = await res.json();
+    setUrgencyHint(data.urgency);
+    setUrgencyRationale(data.rationale);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -77,6 +133,8 @@ export function ListingForm({ listing }: { listing?: EditableListing }) {
       pickupWindowStart: new Date(pickupWindowStart).toISOString(),
       pickupWindowEnd: new Date(pickupWindowEnd).toISOString(),
       claimExpiresAt: new Date(claimExpiresAt).toISOString(),
+      safetyNotes: safetyNotes.trim() || undefined,
+      urgencyHint,
     };
 
     const res = await fetch(
@@ -88,14 +146,19 @@ export function ListingForm({ listing }: { listing?: EditableListing }) {
       }
     );
 
-    setLoading(false);
-
     if (!res.ok) {
       const data = await res.json().catch(() => null);
       setError(data?.error || "Something went wrong. Please try again.");
+      setLoading(false);
       return;
     }
 
+    if (!isEdit) {
+      const { id } = await res.json();
+      await fetch(`/api/listings/${id}/allocate`, { method: "POST" });
+    }
+
+    setLoading(false);
     toast.success(isEdit ? "Listing updated" : "Listing posted");
     setOpen(false);
     router.refresh();
@@ -119,6 +182,26 @@ export function ListingForm({ listing }: { listing?: EditableListing }) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {!isEdit ? (
+            <div className="flex flex-col gap-2 rounded-md border bg-muted/30 p-3">
+              <Label htmlFor="aiText">Describe it in your own words (optional)</Label>
+              <Textarea
+                id="aiText"
+                placeholder="e.g. bunch of leftover catering trays, some dairy, need gone tonight"
+                value={aiText}
+                onChange={(e) => setAiText(e.target.value)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={parsing || !aiText.trim()}
+                onClick={handleParseWithAi}
+              >
+                {parsing ? "Parsing..." : "Parse with AI"}
+              </Button>
+            </div>
+          ) : null}
           <div className="flex flex-col gap-2">
             <Label htmlFor="title">Title</Label>
             <Input id="title" required value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -206,6 +289,42 @@ export function ListingForm({ listing }: { listing?: EditableListing }) {
               onChange={(e) => setClaimExpiresAt(e.target.value)}
             />
           </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="safetyNotes">Safety notes (optional)</Label>
+            <Textarea
+              id="safetyNotes"
+              placeholder="e.g. keep refrigerated, contains raw egg"
+              value={safetyNotes}
+              onChange={(e) => setSafetyNotes(e.target.value)}
+            />
+          </div>
+          {!isEdit ? (
+            <div className="flex flex-col gap-2 rounded-md border p-3">
+              <div className="flex items-center justify-between">
+                <Label>Urgency: {Math.round(urgencyHint * 100)}%</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={scoringUrgency || !aiText.trim()}
+                  onClick={handleRecheckUrgency}
+                >
+                  {scoringUrgency ? "Checking..." : "Re-check urgency"}
+                </Button>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={urgencyHint}
+                onChange={(e) => setUrgencyHint(parseFloat(e.target.value))}
+              />
+              {urgencyRationale ? (
+                <p className="text-xs text-muted-foreground">{urgencyRationale}</p>
+              ) : null}
+            </div>
+          ) : null}
 
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <DialogFooter>
