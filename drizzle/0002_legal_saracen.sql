@@ -1,0 +1,1 @@
+ALTER TABLE "listings" ADD COLUMN "urgency_hint" double precision DEFAULT 0.5 NOT NULL;
