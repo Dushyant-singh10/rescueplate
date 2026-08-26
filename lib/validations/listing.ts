@@ -11,6 +11,9 @@ export const createListingSchema = z
     pickupWindowStart: z.coerce.date(),
     pickupWindowEnd: z.coerce.date(),
     claimExpiresAt: z.coerce.date(),
+    safetyNotes: z.string().trim().max(1000).optional(),
+    urgencyHint: z.number().min(0).max(1).default(0.5),
+    imageUrl: z.url().max(2000).optional(),
   })
   .refine((d) => d.pickupWindowEnd > d.pickupWindowStart, {
     message: "Pickup window end must be after the start",
