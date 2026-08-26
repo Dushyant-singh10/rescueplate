@@ -14,6 +14,7 @@ export default async function AdminDashboard() {
       type: organizations.type,
       address: organizations.address,
       verificationStatus: organizations.verificationStatus,
+      flagged: organizations.flagged,
       createdAt: organizations.createdAt,
     })
     .from(organizations)

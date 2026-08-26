@@ -47,6 +47,21 @@ export function ListingList({ listings }: { listings: ListingRow[] }) {
     });
   }
 
+  function handlePickup(id: string) {
+    setPendingId(id);
+    startTransition(async () => {
+      const res = await fetch(`/api/listings/${id}/pickup`, { method: "POST" });
+      if (!res.ok) {
+        toast.error("Could not confirm pickup for that listing");
+        setPendingId(null);
+        return;
+      }
+      toast.success("Pickup confirmed");
+      router.refresh();
+      setPendingId(null);
+    });
+  }
+
   if (listings.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -92,6 +107,16 @@ export function ListingList({ listings }: { listings: ListingRow[] }) {
                     onClick={() => handleCancel(listing.id)}
                   >
                     Cancel
+                  </Button>
+                </div>
+              ) : listing.status === "claimed" ? (
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    disabled={isPending && pendingId === listing.id}
+                    onClick={() => handlePickup(listing.id)}
+                  >
+                    Mark picked up
                   </Button>
                 </div>
               ) : (

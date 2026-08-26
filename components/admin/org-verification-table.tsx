@@ -19,6 +19,7 @@ export type OrgRow = {
   type: "donor_business" | "receiver_ngo";
   address: string;
   verificationStatus: "pending" | "verified" | "rejected";
+  flagged: boolean;
   createdAt: string;
 };
 
@@ -83,9 +84,12 @@ export function OrgVerificationTable({ initialOrgs }: { initialOrgs: OrgRow[] })
             </TableCell>
             <TableCell className="max-w-xs truncate">{org.address}</TableCell>
             <TableCell>
-              <Badge variant={STATUS_VARIANT[org.verificationStatus]}>
-                {org.verificationStatus}
-              </Badge>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant={STATUS_VARIANT[org.verificationStatus]}>
+                  {org.verificationStatus}
+                </Badge>
+                {org.flagged && <Badge variant="destructive">Flagged</Badge>}
+              </div>
             </TableCell>
             <TableCell className="text-right">
               {org.verificationStatus === "pending" ? (
