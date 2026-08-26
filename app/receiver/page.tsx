@@ -1,5 +1,6 @@
 import { requireRole, getOrgVerification } from "@/lib/auth-helpers";
 import { VerificationBanner } from "@/components/verification-banner";
+import { NearbyListings } from "@/components/receiver/nearby-listings";
 
 export default async function ReceiverDashboard() {
   const session = await requireRole("receiver");
@@ -22,8 +23,8 @@ export default async function ReceiverDashboard() {
           />
         </div>
       ) : (
-        <div className="mt-6 rounded-md border border-dashed p-8 text-center text-muted-foreground">
-          Nearby listings will appear here in the next build step.
+        <div className="mt-6">
+          <NearbyListings />
         </div>
       )}
     </div>
