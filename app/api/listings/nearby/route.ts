@@ -34,6 +34,6 @@ export async function GET(request: Request) {
     100
   );
 
-  const listings = await findNearbyListings(org.lat, org.lng, radiusKm);
+  const listings = await findNearbyListings(org.lat, org.lng, radiusKm, session.user.orgId);
   return NextResponse.json({ listings });
 }
