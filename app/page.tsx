@@ -31,17 +31,19 @@ const FEATURES = [
 
 export default function Home() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16">
+    <div className="relative mx-auto max-w-6xl px-4 py-16">
+      <div className="hero-glow pointer-events-none absolute inset-x-0 top-0 -z-10 h-[32rem]" />
+
       <section className="flex flex-col items-center text-center">
-        <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
+        <h1 className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 text-4xl font-semibold tracking-tight duration-700 sm:text-5xl">
           Surplus food, rescued in real time.
         </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+        <p className="mt-4 max-w-2xl animate-in fade-in slide-in-from-bottom-4 text-lg text-muted-foreground duration-700 delay-150 fill-mode-backwards">
           RescuePlate connects restaurants, caterers, and grocery stores with
           verified NGOs and shelters nearby — turning what would be waste into
           meals, before it expires.
         </p>
-        <div className="mt-8 flex gap-3">
+        <div className="mt-8 flex animate-in fade-in slide-in-from-bottom-4 gap-3 duration-700 delay-300 fill-mode-backwards">
           <Link href="/register">
             <Button size="lg">Get started</Button>
           </Link>
@@ -54,8 +56,12 @@ export default function Home() {
       </section>
 
       <section className="mt-20 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((feature) => (
-          <Card key={feature.title}>
+        {FEATURES.map((feature, i) => (
+          <Card
+            key={feature.title}
+            className="hover-lift animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards"
+            style={{ animationDelay: `${300 + i * 75}ms`, animationDuration: "700ms" }}
+          >
             <CardHeader>
               <CardTitle className="text-base">{feature.title}</CardTitle>
             </CardHeader>
