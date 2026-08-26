@@ -36,10 +36,14 @@ export const listingStatusEnum = pgEnum("listing_status", [
   "cancelled",
 ]);
 
+// "pending" is used in code as "queued" (candidate created, not yet offered).
 export const claimStatusEnum = pgEnum("claim_status", [
   "pending",
+  "offered",
   "confirmed",
+  "declined",
   "picked_up",
+  "expired",
   "no_show",
   "cancelled",
 ]);
@@ -55,6 +59,10 @@ export const organizations = pgTable("organizations", {
     .notNull()
     .default("pending"),
   verificationDocUrl: text("verification_doc_url"),
+  photoUrl: text("photo_url"),
+  about: text("about"),
+  // Only meaningful for receiver_ngo orgs; null = no hard capacity filter in scoring.
+  capacityKg: doublePrecision("capacity_kg"),
   noShowCount: integer("no_show_count").notNull().default(0),
   flagged: boolean("flagged").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -72,6 +80,9 @@ export const users = pgTable("users", {
     onDelete: "set null",
   }),
   phone: text("phone"),
+  // Small avatar stored as a data: URL — no external storage service needed.
+  photoUrl: text("photo_url"),
+  bio: text("bio"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -100,6 +111,9 @@ export const listings = pgTable("listings", {
   status: listingStatusEnum("status").notNull().default("available"),
   lat: doublePrecision("lat").notNull(),
   lng: doublePrecision("lng").notNull(),
+  // 0-1, optionally set by AI intake parsing; feeds engine/scoring.ts urgency.
+  urgencyHint: doublePrecision("urgency_hint").notNull().default(0.5),
+  imageUrl: text("image_url"),
   safetyNotes: text("safety_notes"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -114,10 +128,22 @@ export const claims = pgTable("claims", {
   receiverOrgId: uuid("receiver_org_id")
     .notNull()
     .references(() => organizations.id, { onDelete: "cascade" }),
-  claimedByUserId: uuid("claimed_by_user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  // Set only once a user actually accepts the offer — queued/offered rows
+  // belong to a candidate org, not yet to a specific responding user.
+  claimedByUserId: uuid("claimed_by_user_id").references(() => users.id, {
+    onDelete: "cascade",
+  }),
   status: claimStatusEnum("status").notNull().default("pending"),
+  // Position in the listing's ranked allocation queue (1 = best candidate).
+  rank: integer("rank").notNull().default(1),
+  score: doublePrecision("score"),
+  scoreBreakdown: jsonb("score_breakdown").$type<{
+    distance: number;
+    urgency: number;
+    fairness: number;
+    capacity: number;
+  }>(),
+  respondBy: timestamp("respond_by", { withTimezone: true }),
   claimedAt: timestamp("claimed_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
