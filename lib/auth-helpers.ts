@@ -19,6 +19,8 @@ export async function getOrgVerification(orgId: string) {
       name: organizations.name,
       verificationStatus: organizations.verificationStatus,
       flagged: organizations.flagged,
+      lat: organizations.lat,
+      lng: organizations.lng,
     })
     .from(organizations)
     .where(eq(organizations.id, orgId))
