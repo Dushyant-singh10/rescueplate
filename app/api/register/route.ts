@@ -44,6 +44,7 @@ export async function POST(request: Request) {
           address: org.address,
           lat: org.lat,
           lng: org.lng,
+          capacityKg: org.capacityKg ?? null,
         })
         .returning({ id: organizations.id });
       orgId = createdOrg.id;
