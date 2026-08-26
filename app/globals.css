@@ -128,3 +128,15 @@
     @apply font-sans;
   }
 }
+
+@utility hover-lift {
+  @apply transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg hover:ring-foreground/15;
+}
+
+@utility hero-glow {
+  background: radial-gradient(
+    circle at 50% 0%,
+    color-mix(in oklch, var(--primary) 12%, transparent),
+    transparent 60%
+  );
+}
