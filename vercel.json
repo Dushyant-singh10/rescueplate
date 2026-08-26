@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/expire-listings",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/resolve-claim-windows",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 4 * * *"
     }
   ]
 }
